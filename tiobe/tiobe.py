@@ -39,7 +39,7 @@ def get_page(url):
 
 
 def save_data_to_mysql(data):
-    db = pymysql.connect('localhost', 'root', 'lyy5201314lxy', 'spider')
+    db = pymysql.connect('localhost', 'root', '******', 'spider')
     cursor = db.cursor()
     print(cursor)
     sql = 'insert into tiobe (n2019, n2018, programming_Language, Rating, Change1) values ("%d", "%d", "%s", "%s", "%s")'
