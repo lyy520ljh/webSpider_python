@@ -6,3 +6,5 @@
 * QQ音乐
 * Tiobe 
     > 要创建好数据库及表
+* 淘宝
+    > taobao_selenium.py已过期，selenium会被检测到
