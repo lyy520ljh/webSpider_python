@@ -2,7 +2,7 @@
 #   程序：wzsky.py
 #   版本：0.1
 #   作者：lyy
-#   日期：编写日期2019/01/25，3月15日重新测试
+#   日期：编写日期2019/01/05，测试日期2019/03/15
 #   语言：Python 3.6.x
 #   操作：python wzsky.py
 #   功能：	爬取设计前沿-网页设计的图片存入mongodb
@@ -20,7 +20,7 @@ import time
 import re
 
 BASE_URL = 'http://www.wzsky.net'
-FIRST_URL = 'http://www.wzsky.net/59/'
+FIRST_URL = None
 headers = {
     'User-Agent': 'Mozilla/5.0 (Windows NT 6.1; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) \
     Chrome/72.0.3626.119 Safari/537.36',
@@ -197,21 +197,38 @@ def main(offset, error_url_list):
 
 
 if __name__ == '__main__':
-    # ERROR_URL_LIST作为进程共享变量保存抛出异常的url
-    manager = Manager()
-    ERROR_URL_LIST = manager.list()
-    index_text = get_page(FIRST_URL)
-    total_page = re.search(r'共.*?(\d+).*?页', str(index_text.decode('gb2312'))).group(1)
-    # print(total_page)
-    p_list = []
-    # 开启多进程
-    for i in range(1, int(total_page)+1):
-        p = multiprocessing.Process(target=main, args=(str(i), ERROR_URL_LIST))
-        p.start()
-        p_list.append(p)
-    for res in p_list:
-        res.join()
-    # print(ERROR_URL_LIST)
-    # 将异常url保存至mongodb
-    for err in ERROR_URL_LIST:
-        save_to_mongo(error_url, err)
+    while True:
+        inputs = input('请输入对应选项选择想要爬取的板块：\n\
+58:平面设计\n\
+59:网页设计\n\
+60:广告设计\n\
+61:三维动画\n\
+62:标志设计\n\
+exit/q:退出')
+        if inputs == 'exit' or inputs == 'q':
+            print('退出！')
+            break
+        elif inputs == '59' or inputs == '60' or inputs == '61' or inputs == '62':
+            FIRST_URL = 'http://www.wzsky.net/%s/' % inputs
+            break
+        else:
+            print('输入错误，请重新输入！')
+    if FIRST_URL:
+        # ERROR_URL_LIST作为进程共享变量保存抛出异常的url
+        manager = Manager()
+        ERROR_URL_LIST = manager.list()
+        index_text = get_page(FIRST_URL)
+        total_page = re.search(r'共.*?(\d+).*?页', str(index_text.decode('gb2312'))).group(1)
+        # print(total_page)
+        p_list = []
+        # 开启多进程
+        for i in range(1, int(total_page)+1):
+            p = multiprocessing.Process(target=main, args=(str(i), ERROR_URL_LIST))
+            p.start()
+            p_list.append(p)
+        for res in p_list:
+            res.join()
+        # print(ERROR_URL_LIST)
+        # 将异常url保存至mongodb
+        for err in ERROR_URL_LIST:
+            save_to_mongo(error_url, err)
